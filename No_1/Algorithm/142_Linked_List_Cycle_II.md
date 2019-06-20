@@ -1,4 +1,7 @@
-[142. Linked List Cycle II](https://leetcode-cn.com/problems/linked-list-cycle-ii/submissions/)
+##[142. Linked List Cycle II](https://leetcode-cn.com/problems/linked-list-cycle-ii/submissions/)
+
+###Introduction
+
 Given a linked list, return the node where the cycle begins. If there is no cycle, return null.
 
 To represent a cycle in the given linked list, we use an integer pos which represents the position (0-indexed) in the linked list where tail connects to. If pos is -1, then there is no cycle in the linked list.
@@ -26,19 +29,17 @@ Output: no cycle
 Explanation: There is no cycle in the linked list.
 ```
 
+###Solution
 
-Solution
-```
 Consider two steps:
 1. Make sure there is cycle or not
    Solution: Two pointer ,one fast ,one slow. If they meet at somewhere, we can say there is cycle.
 2. if has cycle, then find cycle postion
-   Solution: Two pointer, one from starter, one from step1.meet position, both move 1 step one time. The place they meet is the entrance of cycle.
-```
+   Solution: Two pointer, one from starter, one from meeting position of step 1, both move 1 step one time. The place they meet is the entrance of cycle.
 
+###Code
 
-Code
-```
+```python
 # Definition for singly-linked list.
 # class ListNode(object):
 #     def __init__(self, x):
@@ -76,4 +77,18 @@ def detectCycle(self, head):
         return detection
 
 ```
+
+###Performance
+
+1. Time Complexity: 
+
+   O(n)   
+
+2. Space Complexity:
+
+   O(1)
+
+3. Better Solution:
+
+   Not found
 
