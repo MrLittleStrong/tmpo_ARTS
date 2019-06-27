@@ -49,13 +49,17 @@ clang-format -i <filename> -style=file
 
 #### 注意：
 
-clang-format 不支持多文件处理，如果需要的话需要写脚本来执行，例如:
+1. clang-format 不支持多文件处理，如果需要的话需要写脚本来执行，例如:
 
+```shell
+#!/bin/sh
+for file in `find . -name '*.[mh]'`
+do
+    clang-format -i $file -style=file
+done
 ```
 
-```
-
-
+2. clang-format对宏支持不够友好，如果在宏内已经写了分号，调用宏时如果不加分号会与下一行进行合并。
 
 ### 附录
 
@@ -239,5 +243,4 @@ UseTab:	Never
 
 ```
 
-####  
-
+#### 
