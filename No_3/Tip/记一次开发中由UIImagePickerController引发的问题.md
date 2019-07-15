@@ -1,0 +1,29 @@
+###起因
+
+由于业务需求要求做一个护眼模式的功能。参考简书上一篇文章[微博iOS的护眼模式](https://www.jianshu.com/p/188b64828ddb)来用设置一个高WindowLevel的UIWindow覆盖在底层UIWindow上来实现。
+
+开发整体进度还是很快的。但是开发过程中还是遇到了3个坑。
+
+### 坑一：护眼Window出现时机
+
+文章里的方案是说放在rootViewController的viewWIllAppear中。当时不理解，直接放到了viewDidLoad里，结果报错了。原因正如在文章里介绍的，我们的keyWindow在没渲染完成，将其转掉是有问题。
+
+在此处还发现了另外一个问题，那就是必须得给我们的这个护眼Window添加个rootViewController，否则莫名其妙的就会报KeyWindow没有rootViewController而崩溃
+
+### 坑二：护眼Window出现的时候，UIImagePickerController的相册页面没有反应
+
+文章没有介绍这个问题，由于这个Window盖在所有的页面上方，出于谨慎，我还是把所有的页面都试了一下，结果还是测出了这个问题。
+
+测试还发现在iOS10以下的系统是没有问题的。
+
+通过一系列研究，应该是UIImagePickerController在iOS10实现方式做了改变。在暂停获取页面层级的时候，iOS10以下的ImagePickerController的页面是可以显示View内部的TableView，乃至Cell。推断这里是通过正常的ViewController的Present方式来实现的。而在iOS10及以上，ImagePickerController的页面显示不出来View内部的TableView，只有一个RemoteViewController，通过字面意思可以猜测这个页面是托管到别的地方去实现了。通过对Keywindow的hitTest做监控也发现，在iOS10以上系统上对ImagepickerController内部做拖动点击之类的，无法触发Keywindow的hitTest。
+
+**这块的资料并不多，对于RemoteViewController更是屈指可数，根据零星的资料猜测，应该是苹果使用了多进程的实现方式**
+
+**解决方案：给ImagePickerController写了个Category，覆盖了原类的viewWillAppear，viewWillDisappear方法，在显示的时候临时去掉护眼模式。但这种方式并不优雅，而且如果后期对ImagePickerController有其他的分类需求的时候容易再次覆盖我的方法，导致问题重生**
+
+### 坑三：UIWindow的KeyWindow继承方式导致护眼Window成为Keywindow
+
+当弹出系统权限请求的alert时，keywindow会被alert所在的window抢走，而alert消失之后，系统会将keywindow回退回去，这时候系统会选择windowLevel高的优先继承为Keywindow。这时候我们的护眼window就会成为Keywindow。有些控件加载到Keywindow上时就没有护眼的效果了。而且会有各种潜在的问题。
+
+**解决方案：在护眼模块注册Keywindow的更换通知，如果Keywindow为自己的护眼window，hide紧接着show一下，让其将keywindow交出去。**
